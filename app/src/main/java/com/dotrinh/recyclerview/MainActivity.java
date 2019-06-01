@@ -18,12 +18,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.dotrinh.recyclerview.model.Person;
+
+import java.util.ArrayList;
 
 import static com.dotrinh.recyclerview.misc.LogUtil.LogI;
 
 public class MainActivity extends AppCompatActivity {
+
+    ArrayList<Person> people = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,14 +41,21 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView myRecycleView = findViewById(R.id.myRecycleView);
         myRecycleView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 //        myRecycleView.setLayoutManager(new GridLayoutManager(this, 2));
+        initData();
         myRecycleView.setAdapter(new ChildAdapter());
+    }
+
+    void initData() {
+        for (int i = 0; i < 20; i++) {
+            people.add(new Person(i, "Dotrinh", false));
+        }
     }
 
     public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.ChildViewHolder> {
 
         @Override
         public int getItemCount() {
-            return 50;
+            return people.size();
         }
 
         public ChildAdapter.ChildViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -51,26 +65,36 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull ChildAdapter.ChildViewHolder holder, int position) { // this method will call every time when we refresh recyclerview
-            holder.rowItem.setText(position + " Dotrinh.com");
+            holder.rowItem.setText(people.get(position).getName() + " " + position);
+            holder.checkBox.setChecked(people.get(position).isCheck());
             LogI("dong thu: " + position);
         }
 
         // VIEW HOLDER
-        class ChildViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        class ChildViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, CheckBox.OnCheckedChangeListener {
 
             CardView card_view;
             TextView rowItem;
+            CheckBox checkBox;
 
             ChildViewHolder(@NonNull View itemView) {
                 super(itemView);
                 card_view = itemView.findViewById(R.id.cardView);
                 rowItem = itemView.findViewById(R.id.rowItem);
+                checkBox = itemView.findViewById(R.id.checkBox);
                 card_view.setOnClickListener(this);
+                checkBox.setOnCheckedChangeListener(this);
             }
 
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "dong thu: " + getAdapterPosition(), Toast.LENGTH_SHORT).show();
+                people.get(getAdapterPosition()).setCheck(!people.get(getAdapterPosition()).isCheck());
+                notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                people.get(getAdapterPosition()).setCheck(isChecked);
             }
         }
 
